@@ -1,6 +1,7 @@
 from django.shortcuts import render
+from django.http import Http404
 
-# Create your views here.
+
 posts = [
     {
         'id': 0,
@@ -44,20 +45,24 @@ posts = [
     },
 ]
 
+posts_dict = {post['id']: post for post in posts}
+
 
 def index(request):
+    """Главная страница с обратным порядком постов."""
     return render(request, 'blog/index.html', {'posts': reversed(posts)})
 
 
 def post_detail(request, pk):
-    post = next((p for p in posts if p['id'] == pk), None)
-    if not post:
-        from django.http import Http404
-        raise Http404("Пост не найден")
-    return render(request, 'blog/detail.html', {'post': post})
+    """Детальная страница поста."""
+    if pk not in posts_dict:
+        raise Http404('Пост не найден')
+    return render(request, 'blog/detail.html', {'post': posts_dict[pk]})
 
 
 def category_posts(request, category_slug):
+    """Страница категории."""
     return render(
-        request, 'blog/category.html',
+        request,
+        'blog/category.html',
         {'category_slug': category_slug})
